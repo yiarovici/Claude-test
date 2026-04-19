@@ -62,6 +62,8 @@ async function reverseGeocode(lat, lon) {
   return country ? `${city}, ${country}` : city;
 }
 
+const toF = c => Math.round(c * 9 / 5 + 32);
+
 async function fetchForecast(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5`;
@@ -82,8 +84,8 @@ function renderForecast(data, locationName) {
   const { time, weathercode, temperature_2m_max, temperature_2m_min } = data.daily;
   const cards = time.map((date, i) => {
     const { label, emoji } = wmo(weathercode[i]);
-    const hi = Math.round(temperature_2m_max[i]);
-    const lo = Math.round(temperature_2m_min[i]);
+    const hi = toF(temperature_2m_max[i]);
+    const lo = toF(temperature_2m_min[i]);
     return `
       <div class="card">
         <div class="day">${formatDay(date, i)}</div>
