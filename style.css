@@ -136,6 +136,14 @@ button:hover { background: #333; }
   margin-left: 0.3rem;
 }
 
+/* Quip */
+#quip {
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  color: #888;
+  font-style: italic;
+}
+
 /* Loading */
 .spinner {
   display: inline-block;

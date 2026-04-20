@@ -62,6 +62,8 @@ async function reverseGeocode(lat, lon) {
   return country ? `${city}, ${country}` : city;
 }
 
+const toF = c => Math.round(c * 9 / 5 + 32);
+
 async function fetchForecast(lat, lon) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=5`;
@@ -71,6 +73,23 @@ async function fetchForecast(lat, lon) {
 }
 
 // ── Rendering ──────────────────────────────────────────────────────────────
+
+function getQuip(code, tempF) {
+  if (code === 0  && tempF > 95)  return "Clear skies. The sun has chosen violence.";
+  if (code === 0  && tempF > 75)  return "Perfect weather. Statistically suspicious.";
+  if (code === 0  && tempF >= 55) return "Clear and pleasant. No excuses to stay inside.";
+  if (code === 0  && tempF < 20)  return "Gorgeous sunny day. Your face will freeze off, but still.";
+  if (code === 0)                 return "Clear skies. Nature is showing off.";
+  if (code <= 2   && tempF > 85)  return "Partly cloudy, mostly suffering.";
+  if (code <= 3)                  return "Clouds are just the sky being indecisive.";
+  if (code <= 48)                 return "Fog. Nature deleted the background to save memory.";
+  if (code <= 55)                 return "Drizzling — not enough to cancel plans, just enough to ruin them.";
+  if (code <= 65)                 return "It's raining. Your umbrella is at home, isn't it.";
+  if (code <= 77)                 return "Snow! Great news if you're a child or a dog.";
+  if (code <= 82)                 return "Heavy showers. The sky has strong opinions today.";
+  if (code <= 86)                 return "Snow showers. Nature's confetti, but colder and worse.";
+  return "Thunderstorm. Ideal weather for reconsidering your life choices indoors.";
+}
 
 function formatDay(dateStr, index) {
   if (index === 0) return "Today";
@@ -82,8 +101,8 @@ function renderForecast(data, locationName) {
   const { time, weathercode, temperature_2m_max, temperature_2m_min } = data.daily;
   const cards = time.map((date, i) => {
     const { label, emoji } = wmo(weathercode[i]);
-    const hi = Math.round(temperature_2m_max[i]);
-    const lo = Math.round(temperature_2m_min[i]);
+    const hi = toF(temperature_2m_max[i]);
+    const lo = toF(temperature_2m_min[i]);
     return `
       <div class="card">
         <div class="day">${formatDay(date, i)}</div>
@@ -95,6 +114,7 @@ function renderForecast(data, locationName) {
 
   $("location-name").textContent = locationName;
   $("cards").innerHTML = cards;
+  $("quip").textContent = getQuip(weathercode[0], toF(temperature_2m_max[0]));
   hide("loading");
   show("forecast");
 }
